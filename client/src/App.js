@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import { gql, useQuery } from '@apollo/client'
 import Persons from './courseComponents/Persons'
+import PersonForm from './courseComponents/PersonForm'
 
 const ALL_PERSONS = gql`
   query {
@@ -24,6 +25,7 @@ const App = () => {
   return (
     <div>
       <Persons persons={result.data.allPersons} />
+      <PersonForm />
     </div>
   );
 }
