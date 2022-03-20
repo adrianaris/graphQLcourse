@@ -1,0 +1,26 @@
+{
+  "name": "graphqlfso",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/adrianaris/graphQLfso.git"
+  },
+  "author": "Adrian Serbanescu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adrianaris/graphQLfso/issues"
+  },
+  "homepage": "https://github.com/adrianaris/graphQLfso#readme",
+  "dependencies": {
+    "apollo-server": "^3.6.4",
+    "apollo-server-core": "^3.6.4",
+    "graphql": "^16.3.0",
+    "uuid": "^8.3.2"
+  }
+}
