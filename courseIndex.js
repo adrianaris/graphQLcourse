@@ -85,7 +85,7 @@ const resolvers = {
         city: root.city
       }
     }
-  }
+  },
 
   Mutation: {
     addPerson: (root, args) => {
