@@ -5,7 +5,9 @@ import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
-import { ApolloClient, HttpLink, InMemoryCache, gql } from '@apollo/client'
+import {
+  ApolloClient, HttpLink, InMemoryCache, gql, ApolloProvider
+} from '@apollo/client'
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -34,9 +36,11 @@ client.query({ query })
   })
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <ApolloProvider client={client}>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </ApolloProvider>,
   document.getElementById('root')
 );
 
