@@ -98,7 +98,7 @@ const resolvers = {
       const person = { ...args, id: uuid() }
       persons = persons.concat(person)
       return person
-    }
+    },
 
     editNumber: (root, args) => {
       const person = person.find(p => p.name === args.name)
