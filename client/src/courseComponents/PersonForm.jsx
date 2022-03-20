@@ -32,6 +32,7 @@ const PersonForm = () => {
     event.preventDefault()
 
     createPerson({ variables: { name, phone, street, city } })
+
     setName('')
     setPhone('')
     setStreet('')
