@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { ALL_PERSONS } from './courseComponents/queries'
 import { useQuery } from '@apollo/client'
 import Persons from './courseComponents/Persons'
 import PersonForm from './courseComponents/PersonForm'
-import { ALL_PERSONS } from './courseComponents/queries'
 import Notify from './courseComponents/Notify'
 
 const App = () => {
