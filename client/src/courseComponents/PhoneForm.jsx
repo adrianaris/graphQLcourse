@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { EDIT_NUMBER, ALL_PERSONS } from './queries'
 
-const PhoneForm = () => {
+const PhoneForm = ({ setError }) => {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
 
-  const [ changeNumber ] = useMutation(EDIT_NUMBER, {
+  const [ changeNumber, result ] = useMutation(EDIT_NUMBER, {
     refetchQueries: [ { query: ALL_PERSONS } ]
   })
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
 
     changeNumber({ variables: { name, phone } })
@@ -18,6 +18,12 @@ const PhoneForm = () => {
     setName('')
     setPhone('')
   }
+
+  useEffect(() => {
+    if (result.data && result.data.editNumber === null) {
+      setError('person not found')
+    }
+  }, [result.data])
 
   return (
     <div>
