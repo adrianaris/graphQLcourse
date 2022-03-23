@@ -16,7 +16,7 @@ export const AUTHORS_AND_BOOKS = gql`
   }
 `
 export const ADD_BOOK = gql`
-  mutation addBook($title: String!, $author: String!, $published: Int!, genres: [String!]!) {
+  mutation addBook($title: String!, $author: String!, $published: Int!, $genres: [String!]!) {
     addBook(title: $title, author: $author, published: $published, genres: $genres) {
       title
       author
@@ -31,7 +31,6 @@ export const EDIT_BIRTH = gql`
       name
       born
       bookCount
-      id
     }
   }
 `

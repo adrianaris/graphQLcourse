@@ -8,15 +8,12 @@ import { AUTHORS_AND_BOOKS } from './components/queries'
 const App = () => {
   const [page, setPage] = useState('authors')
 
-  const result = useQuery(AUTHORS_AND_BOOKS, {
-    pollInterval: 5000
-  })
-  console.log(result)
+  const result = useQuery(AUTHORS_AND_BOOKS)
 
   if (result.loading) {
     return <div>loading...</div>
-  } else if(result.error) {
-    return <div>{result.error}</div>
+  } else if (result.error) {
+    return <div>error</div>
   }
 
   return (
