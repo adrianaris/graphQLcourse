@@ -1,11 +1,9 @@
-import React, { useState } from 'react'
-import { useQuery } from '@apollo/client'
-
 const Authors = (props) => {
   if (!props.show) {
     return null
   }
-  const authors = []
+  const authors = props.authors
+  console.log(authors)
 
   return (
     <div>
@@ -17,7 +15,7 @@ const Authors = (props) => {
             <th>born</th>
             <th>books</th>
           </tr>
-          {authors.map((a) => (
+          {authors?.map((a) => (
             <tr key={a.name}>
               <td>{a.name}</td>
               <td>{a.born}</td>
