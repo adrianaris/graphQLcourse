@@ -5,7 +5,7 @@ import { ADD_BOOK, AUTHORS_AND_BOOKS } from './queries'
 const NewBook = (props) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
-  const [published, setPublished] = useState(Number.parseInt(0))
+  const [published, setPublished] = useState('')
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
   const [ createBook ] = useMutation(ADD_BOOK, {
@@ -19,8 +19,6 @@ const NewBook = (props) => {
 
   const submit = async (event) => {
     event.preventDefault()
-    console.log(published)
-    console.log(Number.isInteger(parseInt(published)))
 
     createBook({ variables: {
       title,
@@ -30,7 +28,7 @@ const NewBook = (props) => {
     } })
 
     setTitle('')
-    setPublished(Number.parseInt(0))
+    setPublished('')
     setAuthor('')
     setGenres([])
     setGenre('')
@@ -65,7 +63,7 @@ const NewBook = (props) => {
           <input
             type="number"
             value={published}
-            onChange={({ target }) => setPublished(target.value)}
+            onChange={({ target }) => setPublished(parseInt(target.value))}
           />
         </div>
         <div>
