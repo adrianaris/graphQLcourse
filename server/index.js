@@ -171,7 +171,11 @@ const resolvers = {
           return a
         })
 
-        return authors.find(a => a.name === args.name)
+        const author = {
+          ...authors.find(a => a.name === args.name),
+          bookCount: books.filter(b => b.author === args.name).length
+        }
+        return author
       }
     }
   }
