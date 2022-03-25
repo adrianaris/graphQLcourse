@@ -39,8 +39,6 @@ const NewBook = (props) => {
     setGenre('')
   }
 
-  console.log(genres)
-
   return (
     <div>
       <form onSubmit={submit}>
