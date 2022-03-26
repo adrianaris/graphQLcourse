@@ -1,4 +1,17 @@
 const { ApolloServer, UserInputError, gql } = require('apollo-server')
+const mongoose = require('mongoose')
+const Person = require('./courseModels/person')
+
+const MONGODB_URI = 'mongodb+srv://fullstackopen:Se6E4Tu9Yf3Zxeku@cluster0.ucr1f.mongodb.net/graphQL?retryWrites=true&w=majority'
+console.log('connecting to', MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+
+mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch((error) => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
 
 let persons = [
   {
@@ -61,21 +74,13 @@ const typeDefs = gql`
   }
 `
 
-const { v1: uuid } = require('uuid')
-
 const resolvers = {
   Query: {
-    personCount: () => persons.length,
-    allPersons: (root, args) => {
-      if (!args.phone) {
-        return persons
-      }
-      const byPhone = (person) => 
-        args.phone === 'YES' ? person.phone : !person.phone
-      return persons.filter(byPhone)
+    personCount: async () => Person.collection.countDocuments(),
+    allPersons: async (root, args) => {
+      return Person.find({})
     },
-    findPerson: (root, args) => 
-      persons.find(p => p.name === args.name)
+    findPerson: async (root, args) => Person.findOne({ name: args.name })
   },
 
   Person: {
@@ -88,27 +93,15 @@ const resolvers = {
   },
 
   Mutation: {
-    addPerson: (root, args) => {
-      if (persons.find(p => p.name === args.name)) {
-        throw new UserInputError('Name must be unique', {
-          invalidArgs: args.name,
-        })
-      }
-
-      const person = { ...args, id: uuid() }
-      persons = persons.concat(person)
-      return person
+    addPerson: async (root, args) => {
+      const person = new Person({ ...args })
+      return person.save()
     },
 
-    editNumber: (root, args) => {
-      const person = persons.find(p => p.name === args.name)
-      if (!person) {
-        return null
-      }
-
-      const updatedPerson = { ...person, phone: args.phone }
-      persons = persons.map(p => p.name === args.name ? updatedPerson : p)
-      return updatedPerson
+    editNumber: async (root, args) => {
+      const person = await Person.findOne({ name: args.name })
+      person.phone = args.phone
+      return person.save()
     }
   }
 }
