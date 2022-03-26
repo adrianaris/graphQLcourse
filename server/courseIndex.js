@@ -1,6 +1,10 @@
 const { ApolloServer, UserInputError, gql } = require('apollo-server')
 const mongoose = require('mongoose')
 const Person = require('./courseModels/person')
+const User = require('./courseModels/user')
+const jwt = require('jsonwebtoken')
+
+const JWT_SECRET = 'NEED_HERE_A_SECRET_KEY'
 
 const MONGODB_URI = 'mongodb+srv://fullstackopen:Se6E4Tu9Yf3Zxeku@cluster0.ucr1f.mongodb.net/graphQL?retryWrites=true&w=majority'
 console.log('connecting to', MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
@@ -42,6 +46,16 @@ const typeDefs = gql`
     NO
   }
 
+  type User {
+    username: String!
+    friends: [Person!]!
+    id: ID!
+  }
+
+  type Token {
+    value: String!
+  }
+
   type Address {
     street: String!
     city: String!
@@ -58,6 +72,7 @@ const typeDefs = gql`
     personCount: Int!
     allPersons(phone: YesNo): [Person!]!
     findPerson(name: String!): Person
+    me: User
   }
 
   type Mutation {
@@ -71,6 +86,13 @@ const typeDefs = gql`
       name: String!
       phone: String!
     ): Person
+    createUser(
+      username: String!
+    ): User
+    login(
+      username: String!
+      password: String!
+    ): Token
   }
 `
 
@@ -78,7 +100,11 @@ const resolvers = {
   Query: {
     personCount: async () => Person.collection.countDocuments(),
     allPersons: async (root, args) => {
-      return Person.find({})
+      if (!args.phone) {
+        return Person.find({})
+      }
+
+      return Person.find({ phone: { $exists: args.phone === 'YES' } })
     },
     findPerson: async (root, args) => Person.findOne({ name: args.name })
   },
@@ -95,13 +121,46 @@ const resolvers = {
   Mutation: {
     addPerson: async (root, args) => {
       const person = new Person({ ...args })
-      return person.save()
+
+      try {
+        await person.save()
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args,
+        })
+      }
+
+      return person
     },
 
     editNumber: async (root, args) => {
       const person = await Person.findOne({ name: args.name })
       person.phone = args.phone
-      return person.save()
+
+      try {
+        await person.save()
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args,
+        })
+      }
+
+      return person
+    },
+
+    createUser: async (root, args) => {
+      const user = new User.findOne({ username: args.username })
+
+      if (!user || args.password !== 'secret') {
+        throw new UserInputError('wrong credentials')
+      }
+
+      const userForToken = {
+        username: user.username,
+        id: user._id
+      }
+
+      return { value: jwt.sign(userForToken, JWT_SECRET) }
     }
   }
 }
