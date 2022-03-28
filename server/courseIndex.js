@@ -1,9 +1,4 @@
-const {
-  ApolloServer,
-  UserInputError,
-  gql,
-  AuthenticationError
-} = require('apollo-server')
+const { ApolloServer, UserInputError, gql } = require('apollo-server')
 const mongoose = require('mongoose')
 const Person = require('./courseModels/person')
 const User = require('./courseModels/user')
@@ -98,9 +93,6 @@ const typeDefs = gql`
       username: String!
       password: String!
     ): Token
-    addAsFriend(
-      name: String!
-    ): User
   }
 `
 
@@ -114,10 +106,7 @@ const resolvers = {
 
       return Person.find({ phone: { $exists: args.phone === 'YES' } })
     },
-    findPerson: async (root, args) => Person.findOne({ name: args.name }),
-    me: (root, args, context) => {
-      return context.currentUser
-    }
+    findPerson: async (root, args) => Person.findOne({ name: args.name })
   },
 
   Person: {
@@ -130,18 +119,11 @@ const resolvers = {
   },
 
   Mutation: {
-    addPerson: async (root, args, context) => {
+    addPerson: async (root, args) => {
       const person = new Person({ ...args })
-      const currentUser = context.currentUser
-
-      if (!currentUser) {
-        throw new AuthenticationError('not authenticated')
-      }
 
       try {
         await person.save()
-        currentUser.friends = currentUser.friends.concat(person)
-        await currentUser.save()
       } catch (error) {
         throw new UserInputError(error.message, {
           invalidArgs: args,
@@ -179,24 +161,6 @@ const resolvers = {
       }
 
       return { value: jwt.sign(userForToken, JWT_SECRET) }
-    },
-    
-    addAsFriend: async (root, args, { currentUser }) => {
-      const nonFriendAlready = person =>
-        !currentUser.friends.map(f => f._id.toString()).includes(person._id.toString())
-
-      if (!currentUser) {
-        throw new AuthenticationError('not authenticated')
-      }
-
-      const person = await Person.findOne({ name: args.name })
-      if (nonFriendAlready(person)) {
-        currentUser.friends = currentUser.friends.concat(person)
-      }
-
-      await currentUser.save()
-
-      return currentUser
     }
   }
 }
