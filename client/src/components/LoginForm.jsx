@@ -6,11 +6,13 @@ const LoginForm = ({ setToken }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  const [ login, result ] = useMutation(LOGIN, {
+  const [login, result] = useMutation(LOGIN, {
     onError: (error) => {
-      console.log(error.graphQLErrors[0].message)
+      console.log(error)
     }
   })
+
+  console.log(result)
 
   useEffect(() => {
     if (result.data) {
@@ -20,10 +22,11 @@ const LoginForm = ({ setToken }) => {
     }
   }, [result.data]) // eslint-disable-line
 
-  const submit = async event => {
+  const submit = async (event) => {
     event.preventDefault()
 
-    login({ variable: { username, password }})
+    login({ variables: { username, password } })
+    console.log('called')
   }
 
   return (
@@ -42,6 +45,7 @@ const LoginForm = ({ setToken }) => {
             onChange={({ target }) => setPassword(target.value)}
           />
         </div>
+        <button type='submit'>login</button>
       </form>
     </div>
   )

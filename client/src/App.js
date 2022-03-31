@@ -11,6 +11,7 @@ const App = () => {
   const [token, setToken] = useState(null)
 
   const result = useQuery(AUTHORS_AND_BOOKS)
+  console.log(result)
   const client = useApolloClient()
 
   if (result.loading) {
