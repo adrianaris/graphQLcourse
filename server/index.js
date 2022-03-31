@@ -142,37 +142,49 @@ const resolvers = {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      let filtered = args.author
-        ? await Book.find({ author: { $exists: true, $in: [args.author] } })
+      const author = await Author.findOne({ name: args.author })
+      let filtered = author
+        ? await Book.find({ author: { $exists: true, $in: [author._id] } })
+            .populate('author')
         : await Book.find({})
       filtered = args.genre
         ? filtered.filter(b => b.genres.includes(args.genre))
         : filtered
 
+      if (author) {
+        let bookCount = await Book.collection.countDocuments({ author: author._id })
+        filtered = filtered.map(b => {
+          b.author.bookCount = bookCount
+          return b
+        })
+      }
+      console.log(filtered)
       return filtered
     },
     allAuthors: async () => {
       let authors = await Author.find({})
+      console.log(authors)
       return authors.map(a => 
         a = { 
             ...a,
-          bookCount: Book.collection.countDocuments({ author: a.name })
+          bookCount: Book.collection.countDocuments({ author: a._id })
           })
     }
   },
 
   Mutation: {
     addBook: async (root, args) => {
-      if (Book.find({ title: args.title })) {
+      let exists = await Book.exists({ title: args.title })
+      if (exists) {
         throw new UserInputError('Book must be unique', {
           invalidArgs: args.title,
         })
       }
-
-      if (!Author.find({ name: args.author })) {
+      exists = await Author.findOne({ name: args.author })
+      if (!exists) {
         let author = new Author({ name: args.author })
         try {
-          var result =  await author.save()
+          exists =  await author.save()
         } catch (error) {
           throw new UserInputError(error.message, {
             invalidArgs: args.author,
@@ -180,32 +192,28 @@ const resolvers = {
         }
       }
 
-      let book = new Book({ ...args, author: result._id })
+      let book = new Book({ ...args, author: exists._id })
 
       try {
         await book.save()
+        await book.populate('author')
       } catch (error) {
         throw new UserInputError(error.message, {
           invalidArgs: args
         })
       }
-
+      book.author.bookCount = await Book.collection.countDocuments({ author: exists._id })
       return book
     },
 
-    editAuthor: (root, args) => {
-      if (!authors.some(a => a.name === args.name)) {
+    editAuthor: async (root, args) => {
+      let author = await Author.findOne({ name: args.name })
+      if (!author) {
         return null
       } else {
-        authors = authors.map(a => {
-          if (a.name === args.name) a.born = args.setBornTo
-          return a
-        })
-
-        const author = {
-          ...authors.find(a => a.name === args.name),
-          bookCount: books.filter(b => b.author === args.name).length
-        }
+        author.bookCount = await Book.collection.countDocuments({ author: author._id })
+        author.born = args.setBornTo ? args.setBornTo : null
+        console.log(author)
         return author
       }
     }

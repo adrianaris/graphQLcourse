@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "course": "node courseIndex.js"
+    "dev": "nodemon index.js",
+    "course": "node courseIndex.js",
+    "devCourse": "nodemon courseIndex.js" 
   },
   "repository": {
     "type": "git",
@@ -26,5 +28,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.8",
     "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }
