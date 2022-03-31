@@ -26,26 +26,27 @@ const App = () => {
     client.resetStore()
   }
 
-  if (!token) {
-    return (
-      <LoginForm setToken={setToken} />
-    )
-  }
-
   return (
     <div>
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
+        {!token &&
+          <button onClick={() => setPage('login')}>login</button>
+        }
+        {token &&
+          <><button onClick={() => setPage('add')}>add book</button>
+            <button onClick={logout}>logout</button></>
+        }
       </div>
-      <button onClick={logout}>logout</button>
 
       <Authors show={page === 'authors'} authors={result.data.allAuthors} />
 
       <Books show={page === 'books'} books={result.data.allBooks} />
 
       <NewBook show={page === 'add'} />
+
+      <LoginForm show={page === 'login'} />
     </div>
   )
 }
