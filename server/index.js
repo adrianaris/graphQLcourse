@@ -147,28 +147,25 @@ const resolvers = {
         ? await Book.find({ author: { $exists: true, $in: [author._id] } })
             .populate('author')
         : await Book.find({})
+            .populate('author')
       filtered = args.genre
         ? filtered.filter(b => b.genres.includes(args.genre))
         : filtered
 
-      if (author) {
-        let bookCount = await Book.collection.countDocuments({ author: author._id })
-        filtered = filtered.map(b => {
-          b.author.bookCount = bookCount
-          return b
-        })
-      }
-      console.log(filtered)
+      filtered = await filtered.map(async b => {
+        b.author.bookCount = await Book.collection.countDocuments({ author: b.author._id })
+        return b
+      })
       return filtered
     },
     allAuthors: async () => {
       let authors = await Author.find({})
-      console.log(authors)
-      return authors.map(a => 
-        a = { 
-            ...a,
-          bookCount: Book.collection.countDocuments({ author: a._id })
-          })
+      authors = await authors.map(async a => {
+        a.bookCount = await Book.collection.countDocuments({ author: a._id })
+        console.log(a)
+        return a
+      })
+      return authors
     }
   },
 
@@ -211,8 +208,9 @@ const resolvers = {
       if (!author) {
         return null
       } else {
-        author.bookCount = await Book.collection.countDocuments({ author: author._id })
         author.born = args.setBornTo ? args.setBornTo : null
+        await author.save()
+        author.bookCount = await Book.collection.countDocuments({ author: author._id })
         console.log(author)
         return author
       }
