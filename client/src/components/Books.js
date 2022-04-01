@@ -1,4 +1,3 @@
-
 const Books = (props) => {
   const books = props.books
   const genres = props.genres
