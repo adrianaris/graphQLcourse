@@ -9,9 +9,11 @@ import LoginForm from './components/LoginForm'
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
+  const [genre, setGenre] = useState(null)
 
-  const result = useQuery(AUTHORS_AND_BOOKS)
-  console.log(result)
+  const result = useQuery(AUTHORS_AND_BOOKS, {
+    variables: { genre }
+  })
   const client = useApolloClient()
 
   if (result.loading) {
@@ -25,7 +27,12 @@ const App = () => {
     localStorage.clear()
     client.resetStore()
   }
+  const genreFilter = value => {
+    setGenre(value)
+    result.refetch({ genre : value })
+  }
 
+  console.log(result.data)
   return (
     <div>
       <div>
@@ -42,7 +49,13 @@ const App = () => {
 
       <Authors show={page === 'authors'} authors={result.data.allAuthors} />
 
-      <Books show={page === 'books'} books={result.data.allBooks} />
+      <Books 
+        show={page === 'books'}
+        books={result.data.allBooks}
+        genres={result.data.allGenres}
+        genre={genre}
+        setGenre={genreFilter}
+      />
 
       <NewBook show={page === 'add'} />
 

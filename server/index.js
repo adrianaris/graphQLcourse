@@ -132,6 +132,7 @@ const typeDefs = gql`
       genre: String
       ): [Book!]!
     allAuthors: [Author!]!
+    allGenres: [String!]!
     me: User
   }
 
@@ -185,6 +186,13 @@ const resolvers = {
         return a
       })
       return authors
+    },
+
+    allGenres: async () => {
+      const books = await Book.find({})
+      const genres = [ ...new Set(books.reduce((p, c) => p.concat(c.genres), []))]
+      console.log(genres)
+      return genres
     },
 
     me: (root, args, context) => {
