@@ -1,9 +1,12 @@
 const { UserInputError, AuthenticationError } = require('apollo-server')
+const { PubSub } = require('graphql-subscriptions')
 const jwt = require('jsonwebtoken')
 const Author = require('./models/author')
 const Book = require('./models/book')
 const User = require('./models/user')
 const { JWT_SECRET } = require('./utils/config')
+
+const pubsub = new PubSub()
 
 const resolvers = {
   Query: {
@@ -49,7 +52,7 @@ const resolvers = {
 
   Mutation: {
     addBook: async (root, args, context) => {
-      if (!contex.currentUser) {
+      if (!context.currentUser) {
         throw new AuthenticationError('not authenticated')
       }
       let exists = await Book.exists({ title: args.title })
@@ -81,6 +84,9 @@ const resolvers = {
         })
       }
       book.author.bookCount = await Book.collection.countDocuments({ author: exists._id })
+
+      pubsub.publish('BOOK_ADDED', { bookAdded: book })
+
       return book
     },
 
@@ -131,6 +137,11 @@ const resolvers = {
       }
 
       return { value: jwt.sign(userForToken, JWT_SECRET) }
+    }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
     }
   }
 }

@@ -24,6 +24,10 @@ const typeDefs = gql`
     bookCount: Int!
   }
 
+  type Subscription {
+    bookAdded: Book!
+  }
+
   type Query {
     bookCount: Int!
     authorCount: Int!

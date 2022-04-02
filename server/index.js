@@ -7,6 +7,9 @@ const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 const User = require('./models/user')
 
+const { execute, subscribe } = require('graphql')
+const { SubscriptionServer } = require('subscriptions-transport-ws')
+
 const typeDefs = require('./schema')
 const resolvers = require('./resolvers')
 
@@ -111,6 +114,18 @@ const start = async () => {
 
   const schema = makeExecutableSchema({ typeDefs, resolvers })
 
+  const subscriptionServer = SubscriptionServer.create(
+    {
+      schema,
+      execute,
+      subscribe
+    },
+    {
+      server: httpServer,
+      path: ''
+    }
+  )
+
   const server = new ApolloServer({
     schema,
     context: async ({ req }) => {
@@ -123,7 +138,18 @@ const start = async () => {
         return { currentUser }
       }
     },
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })] 
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close()
+            }
+          }
+        }
+      }
+    ] 
   })
 
   await server.start()
