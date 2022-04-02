@@ -24,7 +24,7 @@ const resolvers = {
         : filtered
 
       filtered = await filtered.map(async b => {
-        b.author.bookCount = await Book.collection.countDocuments({ author: b.author._id })
+        b.author.bookCount = b.author.books.length
         return b
       })
       return filtered
@@ -32,7 +32,7 @@ const resolvers = {
     allAuthors: async () => {
       let authors = await Author.find({})
       authors = await authors.map(async a => {
-        a.bookCount = await Book.collection.countDocuments({ author: a._id })
+        a.bookCount = a.books.length
         return a
       })
       return authors
@@ -63,7 +63,7 @@ const resolvers = {
       }
       exists = await Author.findOne({ name: args.author })
       if (!exists) {
-        let author = new Author({ name: args.author })
+        var author = new Author({ name: args.author })
         try {
           exists =  await author.save()
         } catch (error) {
@@ -76,14 +76,16 @@ const resolvers = {
       let book = new Book({ ...args, author: exists._id })
 
       try {
-        await book.save()
+        exists = await book.save()
         await book.populate('author')
+        author.books = author.books.concat(exists._id)
+        await author.save()
       } catch (error) {
         throw new UserInputError(error.message, {
           invalidArgs: args
         })
       }
-      book.author.bookCount = await Book.collection.countDocuments({ author: exists._id })
+      book.author.bookCount = book.author.books.length
 
       pubsub.publish('BOOK_ADDED', { bookAdded: book })
 
@@ -101,8 +103,7 @@ const resolvers = {
       } else {
         author.born = args.setBornTo ? args.setBornTo : null
         await author.save()
-        author.bookCount = await Book.collection.countDocuments({ author: author._id })
-        console.log(author)
+        author.bookCount = author.books.length
         return author
       }
     },
