@@ -7,9 +7,12 @@ import { AUTHORS_AND_BOOKS } from './components/queries'
 import LoginForm from './components/LoginForm'
 
 const App = () => {
+  const localStorageToken = localStorage.getItem('graphQL-token')
   const [page, setPage] = useState('authors')
-  const [token, setToken] = useState(null)
+  const [token, setToken] = useState(localStorageToken)
   const [genre, setGenre] = useState(null)
+
+  console.log(localStorageToken)
 
   const result = useQuery(AUTHORS_AND_BOOKS, {
     variables: { genre }
@@ -32,7 +35,6 @@ const App = () => {
     result.refetch({ genre : value })
   }
 
-  console.log(result.data)
   return (
     <div>
       <div>
@@ -59,7 +61,7 @@ const App = () => {
 
       <NewBook show={page === 'add'} />
 
-      <LoginForm show={page === 'login'} />
+      <LoginForm show={page === 'login'} setToken={setToken} />
     </div>
   )
 }

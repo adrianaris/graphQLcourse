@@ -17,7 +17,7 @@ const LoginForm = ({ setToken, show }) => {
     if (result.data) {
       const token = result.data.login.value
       setToken(token)
-      localStorage.setItem('hraphQL-token', token)
+      localStorage.setItem('graphQL-token', token)
     }
   }, [result.data]) // eslint-disable-line
 

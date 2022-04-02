@@ -16,6 +16,7 @@ import { WebSocketLink } from '@apollo/client/link/ws'
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('graphQL-token')
 
+  console.log(token)
   return {
     headers: {
       ...headers,
