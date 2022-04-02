@@ -7,12 +7,10 @@ import { AUTHORS_AND_BOOKS } from './components/queries'
 import LoginForm from './components/LoginForm'
 
 const App = () => {
-  const localStorageToken = localStorage.getItem('graphQL-token')
   const [page, setPage] = useState('authors')
-  const [token, setToken] = useState(localStorageToken)
+  const [token, setToken] = useState(localStorage.getItem('graphQL-token'))
   const [genre, setGenre] = useState(null)
 
-  console.log(localStorageToken)
 
   const result = useQuery(AUTHORS_AND_BOOKS, {
     variables: { genre }

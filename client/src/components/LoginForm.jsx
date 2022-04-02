@@ -26,7 +26,6 @@ const LoginForm = ({ setToken, show }) => {
     event.preventDefault()
 
     login({ variables: { username, password } })
-    console.log('called')
   }
 
   return (
