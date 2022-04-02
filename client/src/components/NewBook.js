@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useMutation, useSubscription } from '@apollo/client'
-import { ADD_BOOK, AUTHORS_AND_BOOKS, BOOK_ADDED } from './queries'
+import { useMutation } from '@apollo/client'
+import { ADD_BOOK, AUTHORS_AND_BOOKS } from './queries'
+import { updateCache } from '../App'
 
 const NewBook = (props) => {
   const [title, setTitle] = useState('')
@@ -8,15 +9,14 @@ const NewBook = (props) => {
   const [published, setPublished] = useState('')
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
-  const [ createBook ] = useMutation(ADD_BOOK, {
-    refetchQueries: [ { query: AUTHORS_AND_BOOKS }]
+  const [createBook] = useMutation(ADD_BOOK, {
+    onError: error => {
+      console.log(error)
+    },
+    update: (cache, response) => {
+      updateCache(cache, { query: AUTHORS_AND_BOOKS, variables: { ...props.variables } }, response.data.addBook)
+    }
   })
-
-  //useSubscription(BOOK_ADDED, {
-  //  onSubscriptionData: ({ subscriptionData }) => {
-  //    console.log(subscriptionData)
-  //  }
-  //})
 
   if (!props.show) {
     return null

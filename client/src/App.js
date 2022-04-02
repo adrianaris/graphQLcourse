@@ -2,20 +2,44 @@ import { useState } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
-import { useQuery, useApolloClient } from '@apollo/client'
-import { AUTHORS_AND_BOOKS } from './components/queries'
+import { useQuery, useApolloClient, useSubscription } from '@apollo/client'
+import { AUTHORS_AND_BOOKS, BOOK_ADDED } from './components/queries'
 import LoginForm from './components/LoginForm'
+
+export const updateCache = (cache, query, addedBook) => {
+  const uniqByName = a => {
+    let seen = new Set()
+    return a.filter(item => {
+      let k = item.name
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+
+  cache.updateQuery(query, (data) => {
+    return {
+      ...data,
+      allBooks: uniqByName(data.allBooks.concat(addedBook))
+    }
+  })
+}
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(localStorage.getItem('graphQL-token'))
   const [genre, setGenre] = useState(null)
 
-
   const result = useQuery(AUTHORS_AND_BOOKS, {
     variables: { genre }
   })
   const client = useApolloClient()
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData, client }) => {
+      console.log(subscriptionData)
+      const addedBook = subscriptionData.data.bookAdded
+      updateCache(client.cache, { query: AUTHORS_AND_BOOKS, variables: { genre } }, addedBook)
+    }
+  })
 
   if (result.loading) {
     return <div>loading...</div>
@@ -57,7 +81,7 @@ const App = () => {
         setGenre={genreFilter}
       />
 
-      <NewBook show={page === 'add'} />
+      <NewBook show={page === 'add'} variables={{genre}} />
 
       <LoginForm show={page === 'login'} setToken={setToken} />
     </div>
