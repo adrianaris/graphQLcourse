@@ -25,6 +25,8 @@ mongoose.connect(MONGODB_URI)
     console.log('error connecting to MongoDB', error.message)
   })
 
+mongoose.set('debug', true)
+
 let authors = [
   {
     name: 'Robert Martin',
